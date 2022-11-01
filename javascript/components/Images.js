@@ -56,6 +56,7 @@ class Images extends React.Component {
 
     const images = {};
     let nativeImages = [];
+    const { options } = this.props;
 
     if (this.props.images) {
       const imageNames = Object.keys(this.props.images);
@@ -87,6 +88,7 @@ class Images extends React.Component {
     return {
       images,
       nativeImages,
+      options,
     };
   }
 

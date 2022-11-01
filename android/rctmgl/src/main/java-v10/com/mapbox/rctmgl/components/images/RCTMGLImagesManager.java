@@ -9,13 +9,11 @@ import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.mapbox.rctmgl.components.AbstractEventEmitter;
-import com.mapbox.rctmgl.components.AbstractMapFeature;
-import com.mapbox.rctmgl.components.styles.sources.RCTMGLShapeSource;
 import com.mapbox.rctmgl.events.constants.EventKeys;
 import com.mapbox.rctmgl.utils.ImageEntry;
+import com.mapbox.rctmgl.utils.ImageStretchableOptions;
 import com.mapbox.rctmgl.utils.ResourceUtils;
 
 import java.util.AbstractMap;
@@ -92,6 +90,29 @@ public class RCTMGLImagesManager extends AbstractEventEmitter<RCTMGLImages> {
         }
 
         images.setNativeImages(resources);
+    }
+
+    @ReactProp(name = "options")
+    public void setOptions(RCTMGLImages images, ReadableMap map) {
+        List<Map.Entry<String, ImageStretchableOptions>> imageOptionsList = new ArrayList<>();
+        ReadableMapKeySetIterator iterator = map.keySetIterator();
+
+        while (iterator.hasNextKey()) {
+            String imageName = iterator.nextKey();
+
+            ImageStretchableOptions imageOptions = null;
+            if (map.getType(imageName) == ReadableType.Map) {
+                ReadableMap optionsMap = map.getMap(imageName);
+                if (optionsMap != null) {
+                    imageOptions = new ImageStretchableOptions(optionsMap);
+                }
+            }
+            if (imageOptions != null) {
+                imageOptionsList.add(new AbstractMap.SimpleEntry(imageName, imageOptions));
+            }
+        }
+
+        images.setImageOptions(imageOptionsList);
     }
 
     @Override

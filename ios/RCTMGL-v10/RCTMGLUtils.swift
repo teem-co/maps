@@ -8,7 +8,7 @@ class RCTMGLUtils {
     RCTMGLImageQueue.sharedInstance.addImage(url, scale: scale, bridge: bridge, handler: callback)
   }
   
-  static func fetchImages(_ bridge: RCTBridge, style: Style, objects: [String:Any], forceUpdate: Bool, callback: @escaping ()->Void) {
+  static func fetchImages(_ bridge: RCTBridge, style: Style, objects: [String:Any], objectsOptions: ImageOptionsDictionary?, forceUpdate: Bool, callback: @escaping ()->Void) {
     guard !objects.isEmpty else {
       callback()
       return
@@ -40,7 +40,18 @@ class RCTMGLUtils {
             else {
               DispatchQueue.main.async {
                 if let image = image {
-                  try! style.addImage(image, id: imageName, stretchX: [], stretchY: [])
+                    if let options = objectsOptions?[imageName] {
+                      let stretchX: [ImageStretches] = options.stretchX.map {
+                        return ImageStretches(first: $0.first * Float(scale), second: $0.second * Float(scale))
+                      }
+                      let stretchY: [ImageStretches] = options.stretchY.map {
+                        return ImageStretches(first: $0.first * Float(scale), second: $0.second * Float(scale))
+                      }
+                      let content: ImageContent? = options.content != nil ? ImageContent(left: options.content!.left * Float(scale), top: options.content!.top * Float(scale), right: options.content!.right * Float(scale), bottom: options.content!.bottom * Float(scale)) : nil
+                      try! style.addImage(image, id: imageName, stretchX: stretchX, stretchY: stretchY, content: content)
+                    } else {
+                        try! style.addImage(image, id: imageName, stretchX: [], stretchY: [])
+                    }
                   imageLoadedBlock()
                 }
               }
