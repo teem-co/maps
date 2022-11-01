@@ -12,6 +12,7 @@ public class ImageEntry {
     public ArrayList<ImageStretches> stretchX = new ArrayList<>();
     public ArrayList<ImageStretches> stretchY = new ArrayList<>();
     public ImageContent content;
+    public boolean sdf = false;
 
     public ImageEntry(String _uri, Double _scale) {
         uri = _uri;
@@ -65,9 +66,10 @@ public class ImageEntry {
         stretchX = sx;
         stretchY = sy;
         content = c;
+        sdf = options.isSDF;
     }
 
     public ImageStretchableOptions getStretchOptions() {
-        return new ImageStretchableOptions(stretchX, stretchY, content);
+        return new ImageStretchableOptions(stretchX, stretchY, content, sdf);
     }
 }

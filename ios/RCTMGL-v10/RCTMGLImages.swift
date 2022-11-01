@@ -4,6 +4,7 @@ struct ImageOptions {
   var stretchX: [ImageStretches] = []
   var stretchY: [ImageStretches] = []
   var content: ImageContent? = nil
+  var sdf: Bool = false
 }
 
 typealias ImageOptionsDictionary = [String:ImageOptions]
@@ -84,6 +85,9 @@ class RCTMGLImages : UIView, RCTMGLMapComponent {
           if contentProps.count == 4 {
             imageOptions[imageName]?.content = ImageContent(left: contentProps[0], top: contentProps[1], right: contentProps[2], bottom: contentProps[3])
           }
+        }
+        if let sdfValue = opts["sdf"] as? Bool {
+          imageOptions[imageName]?.sdf = sdfValue
         }
       }
     }

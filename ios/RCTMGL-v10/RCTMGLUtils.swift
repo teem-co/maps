@@ -48,7 +48,7 @@ class RCTMGLUtils {
                         return ImageStretches(first: $0.first * Float(scale), second: $0.second * Float(scale))
                       }
                       let content: ImageContent? = options.content != nil ? ImageContent(left: options.content!.left * Float(scale), top: options.content!.top * Float(scale), right: options.content!.right * Float(scale), bottom: options.content!.bottom * Float(scale)) : nil
-                      try! style.addImage(image, id: imageName, stretchX: stretchX, stretchY: stretchY, content: content)
+                      try! style.addImage(image, id: imageName, sdf: options.sdf, stretchX: stretchX, stretchY: stretchY, content: content)
                     } else {
                         try! style.addImage(image, id: imageName, stretchX: [], stretchY: [])
                     }

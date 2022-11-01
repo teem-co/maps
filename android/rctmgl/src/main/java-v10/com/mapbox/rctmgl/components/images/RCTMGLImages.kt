@@ -33,7 +33,7 @@ fun Style.addBitmapImage(imageId: String, bitmap: Bitmap, imageOptions: ImageStr
         imageId,
         (1.0/((160.0/bitmap.density))).toFloat(),
         Image(bitmap.width, bitmap.height, byteBuffer.array()),
-        sdf,
+        imageOptions?.isSDF ?: false,
         imageOptions?.stretchX ?: listOf(),
         imageOptions?.stretchY ?: listOf(),
         imageOptions?.content

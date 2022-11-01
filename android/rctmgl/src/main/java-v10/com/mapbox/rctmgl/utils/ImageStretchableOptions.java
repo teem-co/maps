@@ -13,11 +13,13 @@ public class ImageStretchableOptions {
     public ArrayList<ImageStretches> stretchX;
     public ArrayList<ImageStretches> stretchY;
     public ImageContent content;
+    public boolean isSDF = false;
 
-    public ImageStretchableOptions(ArrayList<ImageStretches> stretchX, ArrayList<ImageStretches> stretchY, ImageContent content) {
+    public ImageStretchableOptions(ArrayList<ImageStretches> stretchX, ArrayList<ImageStretches> stretchY, ImageContent content, boolean sdf) {
         this.stretchX = stretchX;
         this.stretchY = stretchY;
         this.content = content;
+        this.isSDF = sdf;
     }
 
     public ImageStretchableOptions(ArrayList<ImageStretches> stretchX, ArrayList<ImageStretches> stretchY) {
@@ -42,6 +44,9 @@ public class ImageStretchableOptions {
                         Float.parseFloat(content.get(3).toString())
                 );
             }
+        }
+        if (options.hasKey("sdf") && options.getType("sdf") == ReadableType.Boolean) {
+            this.isSDF = options.getBoolean("sdf");
         }
     }
 
