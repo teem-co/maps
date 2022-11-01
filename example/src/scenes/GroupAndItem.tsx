@@ -61,6 +61,7 @@ import StyleJson from '../examples/Map/StyleJson';
 import TwoByTwo from '../examples/Map/TwoByTwo';
 // SYMBOLCIRCLELAYER
 import CustomIcon from '../examples/SymbolCircleLayer/CustomIcon';
+import StretchedIcon from '../examples/SymbolCircleLayer/StretchedIcon';
 import DataDrivenCircleColors from '../examples/SymbolCircleLayer/DataDrivenCircleColors';
 import Earthquakes from '../examples/SymbolCircleLayer/Earthquakes';
 import ShapeSourceIcon from '../examples/SymbolCircleLayer/ShapeSourceIcon';
@@ -248,6 +249,7 @@ const Examples = new ExampleGroup('React Native Mapbox', [
   ]),
   new ExampleGroup('Symbol/CircleLayer', [
     new ExampleItem('Custom Icon', CustomIcon),
+    new ExampleItem('Stretched Icon', StretchedIcon),
     new ExampleItem('Clustering Earthquakes', Earthquakes),
     new ExampleItem('Shape Source From Icon', ShapeSourceIcon),
     new ExampleItem('Data Driven Circle Colors', DataDrivenCircleColors),

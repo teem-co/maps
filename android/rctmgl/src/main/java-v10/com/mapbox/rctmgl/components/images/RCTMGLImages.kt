@@ -2,10 +2,11 @@ package com.mapbox.rctmgl.components.images
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.mapbox.rctmgl.components.images.RCTMGLImagesManager
+import android.graphics.BitmapFactory
 import com.mapbox.rctmgl.components.AbstractMapFeature
 import com.mapbox.rctmgl.utils.ImageEntry
 import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import androidx.core.content.res.ResourcesCompat
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.None
@@ -14,17 +15,17 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.rctmgl.R
 import com.mapbox.rctmgl.components.mapview.RCTMGLMapView
-import com.mapbox.rctmgl.components.images.RCTMGLImages
 import com.mapbox.rctmgl.events.ImageMissingEvent
 import com.mapbox.rctmgl.utils.BitmapUtils
 import com.mapbox.rctmgl.utils.DownloadMapImageTask
+import com.mapbox.rctmgl.utils.ImageStretchableOptions
 import java.nio.ByteBuffer
 import java.util.AbstractMap
 import java.util.ArrayList
-import java.util.HashMap
 import java.util.HashSet
+import kotlin.collections.HashMap
 
-fun Style.addBitmapImage(imageId: String, bitmap: Bitmap) : Expected<String, None> {
+fun Style.addBitmapImage(imageId: String, bitmap: Bitmap, imageOptions: ImageStretchableOptions? = null) : Expected<String, None> {
     val byteBuffer = ByteBuffer.allocate(bitmap.byteCount)
     bitmap.copyPixelsToBuffer(byteBuffer)
     val sdf = false
@@ -33,9 +34,9 @@ fun Style.addBitmapImage(imageId: String, bitmap: Bitmap) : Expected<String, Non
         (1.0/((160.0/bitmap.density))).toFloat(),
         Image(bitmap.width, bitmap.height, byteBuffer.array()),
         sdf,
-        listOf(),
-        listOf(),
-        null
+        imageOptions?.stretchX ?: listOf(),
+        imageOptions?.stretchY ?: listOf(),
+        imageOptions?.content
     )
 }
 
@@ -43,6 +44,7 @@ class RCTMGLImages(context: Context, private val mManager: RCTMGLImagesManager) 
     var mCurrentImages: MutableSet<String?>
     private var mImages: MutableMap<String, ImageEntry>?
     private var mNativeImages: MutableMap<String?, BitmapDrawable?>?
+    private var mImagesOptions: MutableMap<String, ImageStretchableOptions>?
     private var mSendMissingImageEvents = false
     private var mMap: MapboxMap? = null
     var iD: String? = null
@@ -76,12 +78,27 @@ class RCTMGLImages(context: Context, private val mManager: RCTMGLImagesManager) 
         mSendMissingImageEvents = value
     }
 
+    fun setImageOptions(options: List<Map.Entry<String, ImageStretchableOptions>>) {
+        val newImageOptions: MutableMap<String, ImageStretchableOptions> = HashMap()
+        for ((key, value) in options) {
+            val oldValue = mImagesOptions?.put(key, value)
+            if (oldValue == null) {
+                newImageOptions[key] = value
+            }
+            if (mImages != null) {
+                val entry = mImages!![key]
+                entry?.stretchOptions = value
+            }
+        }
+    }
+
     override fun removeFromMap(mapView: RCTMGLMapView) {
         removeImages(mapView)
         mMap = null
         mNativeImages = HashMap()
         mImages = HashMap()
         mCurrentImages = HashSet()
+        mImagesOptions = HashMap()
         super.removeFromMap(mapView)
     }
 
@@ -216,6 +233,7 @@ class RCTMGLImages(context: Context, private val mManager: RCTMGLImagesManager) 
         mCurrentImages = HashSet()
         mImages = HashMap()
         mNativeImages = HashMap()
+        mImagesOptions = HashMap()
         if (mImagePlaceholder == null) {
             mImagePlaceholder = BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.empty_drawable, null))
         }

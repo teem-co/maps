@@ -29,7 +29,7 @@ import java.util.ArrayList
 import java.util.HashMap
 
 class DownloadMapImageTask(context: Context, map: MapboxMap, callback: OnAllImagesLoaded?) :
-    AsyncTask<Map.Entry<String, ImageEntry>, Void?, List<Map.Entry<String, Bitmap>>?>() {
+    AsyncTask<Map.Entry<String, ImageEntry>, Void?, MutableMap<String, DownloadMapImageTask.DownloadResponse>>() {
     private val mContext: WeakReference<Context>
     private val mMap: WeakReference<MapboxMap>
     private val mCallback: OnAllImagesLoaded?
@@ -39,10 +39,13 @@ class DownloadMapImageTask(context: Context, map: MapboxMap, callback: OnAllImag
         fun onAllImagesLoaded()
     }
 
+    class DownloadResponse(var bitmap: Bitmap, var options: ImageStretchableOptions)
+
     @SafeVarargs
-    protected override fun doInBackground(vararg objects: Map.Entry<String, ImageEntry>): List<Map.Entry<String, Bitmap>>? {
+    protected override fun doInBackground(vararg objects: Map.Entry<String, ImageEntry>): MutableMap<String, DownloadResponse> {
+        val responses: MutableMap<String, DownloadResponse> = HashMap()
         val images: MutableList<Map.Entry<String, Bitmap>> = ArrayList()
-        val context = mContext.get() ?: return images
+        val context = mContext.get() ?: return responses
         val resources = context.resources
         val metrics = resources.displayMetrics
         for ((key, imageEntry) in objects) {
@@ -73,11 +76,7 @@ class DownloadMapImageTask(context: Context, map: MapboxMap, callback: OnAllImag
                                 (DisplayMetrics.DENSITY_DEFAULT.toDouble() * imageEntry.getScaleOr(
                                     1.0
                                 )).toInt()
-                            images.add(
-                                AbstractMap.SimpleEntry(
-                                    key, bitmap
-                                )
-                            )
+                            responses[key] = DownloadResponse(bitmap, imageEntry.stretchOptions)
                         } else {
                             FLog.e(LOG_TAG, "Failed to load bitmap from: $uri")
                         }
@@ -100,28 +99,24 @@ class DownloadMapImageTask(context: Context, map: MapboxMap, callback: OnAllImag
                     getBitmapOptions(metrics, imageEntry.scale)
                 )
                 if (bitmap != null) {
-                    images.add(
-                        AbstractMap.SimpleEntry(
-                            key, bitmap
-                        )
-                    )
+                    responses[key] = DownloadResponse(bitmap, imageEntry.stretchOptions)
                 } else {
                     FLog.e(LOG_TAG, "Failed to load bitmap from: $uri")
                 }
             }
         }
-        return images
+        return responses
     }
 
-    override fun onPostExecute(images: List<Map.Entry<String, Bitmap>>?) {
+    override fun onPostExecute(responses: MutableMap<String, DownloadResponse>) {
         val map = mMap.get()
-        if (map != null && images != null && images.size > 0) {
+        if (map != null && responses.entries.size > 0) {
             val style = map.getStyle()
             if (style != null) {
                 val bitmapImages = HashMap<String, Bitmap>()
-                for ((key, value) in images) {
-                    bitmapImages[key] = value
-                    style.addBitmapImage(key, value)
+                for ((key, value) in responses) {
+                    bitmapImages[key] = value.bitmap
+                    style.addBitmapImage(key, value.bitmap, value.options)
                 }
                 // style.addImages(bitmapImages);
             }

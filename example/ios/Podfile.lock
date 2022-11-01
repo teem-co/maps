@@ -365,18 +365,18 @@ PODS:
     - React-jsi (= 0.69.4)
     - React-logger (= 0.69.4)
     - React-perflogger (= 0.69.4)
-  - rnmapbox-maps (10.0.0-beta.48):
+  - rnmapbox-maps (10.0.0-beta.52):
     - MapboxMaps (~> 10.9.0)
     - React
     - React-Core
-    - rnmapbox-maps/DynamicLibrary (= 10.0.0-beta.46)
+    - rnmapbox-maps/DynamicLibrary (= 10.0.0-beta.52)
     - Turf
-  - rnmapbox-maps/DynamicLibrary (10.0.0-beta.48):
+  - rnmapbox-maps/DynamicLibrary (10.0.0-beta.52):
     - MapboxMaps (~> 10.9.0)
     - React
     - React-Core
     - Turf
-  - RNScreens (3.18.1):
+  - RNScreens (3.18.2):
     - React-Core
     - React-RCTImage
   - RNSVG (12.4.4):
@@ -569,9 +569,9 @@ SPEC CHECKSUMS:
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 3d02b25ca00c2d456734d0bcff864cbc62f6ae1a
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
-  MapboxCommon: 3c82587e77a92aa34a6166b164dadb856be6975f
-  MapboxCoreMaps: 1f45781e96f509d7f0d2134153725003ca84820c
-  MapboxMaps: 44e631a7725518487442933bb56e7c4e736b9f95
+  MapboxCommon: bfffb68226f650df065cf24e307576267ebc75e8
+  MapboxCoreMaps: 34ae725a08a720e1e0cd4530c37ec78e0682abf9
+  MapboxMaps: d11d792fb181a44975dce3a356f763a407a078cc
   MapboxMobileEvents: febdd92835daa258ca1c1faad0821c0b3394ef40
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
   RCT-Folly: b9d9fe1fc70114b751c076104e52f3b1b5e5a95a
@@ -601,8 +601,8 @@ SPEC CHECKSUMS:
   React-RCTVibration: 9adb4a3cbb598d1bbd46a05256f445e4b8c70603
   React-runtimeexecutor: 61ee22a8cdf8b6bb2a7fb7b4ba2cc763e5285196
   ReactCommon: 8f67bd7e0a6afade0f20718f859dc8c2275f2e83
-  rnmapbox-maps: 0296c58337ee65a063e00477d1235aa873961e18
-  RNScreens: 1b7bb502dac62cc4cf01b94bea591c8da275132f
+  rnmapbox-maps: b6fc0adf351b35b104d0ef5221095e39f612c12d
+  RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
   RNSVG: ecd661f380a07ba690c9c5929c475a44f432d674
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
