@@ -3,11 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setExcludedArchitectures = exports.addMapboxInstallerBlock = exports.addInstallerBlock = exports.addConstantBlock = exports.applyCocoaPodsModifications = void 0;
+exports._addMapboxMavenRepo = exports.addMapboxMavenRepo = exports.setExcludedArchitectures = exports.addMapboxInstallerBlock = exports.addInstallerBlock = exports.addConstantBlock = exports.applyCocoaPodsModifications = void 0;
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
-const config_plugins_1 = require("@expo/config-plugins");
-const generateCode_1 = require("@expo/config-plugins/build/utils/generateCode");
+const config_plugins_1 = require("expo/config-plugins");
+const generateCode_1 = require("./generateCode");
 let pkg = {
     name: '@rnmapbox/maps',
 };
@@ -127,7 +127,7 @@ function setExcludedArchitectures(project) {
     for (const { buildSettings } of Object.values(configurations || {})) {
         // Guessing that this is the best way to emulate Xcode.
         // Using `project.addToBuildSettings` modifies too many targets.
-        if (typeof (buildSettings === null || buildSettings === void 0 ? void 0 : buildSettings.PRODUCT_NAME) !== 'undefined') {
+        if (typeof buildSettings?.PRODUCT_NAME !== 'undefined') {
             buildSettings['"EXCLUDED_ARCHS[sdk=iphonesimulator*]"'] = '"arm64"';
         }
     }
@@ -208,39 +208,55 @@ const addLibCppFilter = (appBuildGradle) => {
         comment: '//',
     }).contents;
 };
-const addMapboxMavenRepo = (projectBuildGradle) => {
-    if (projectBuildGradle.includes('api.mapbox.com/downloads/v2/releases/maven'))
-        return projectBuildGradle;
-    /*
-    return projectBuildGradle.replace(
-      /repositories \s?{/,
-      `repositories {
-         maven {
-          url 'https://api.mapbox.com/downloads/v2/releases/maven'
-          authentication { basic(BasicAuthentication) }
-          credentials {
-            username = 'mapbox'
-            password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
-          }
-         }
-    `,
-    );*/
-    return (0, generateCode_1.mergeContents)({
-        tag: `@rnmapbox/maps-v2-maven`,
-        src: projectBuildGradle,
-        newSrc: `maven {
+// Because we need the package to be added AFTER the React and Google maven packages, we create a new allprojects.
+// It's ok to have multiple allprojects.repositories, so we create a new one since it's cheaper than tokenizing
+// the existing block to find the correct place to insert our mapbox maven.
+const gradleMaven = `
+allprojects {
+  repositories {
+    maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication { basic(BasicAuthentication) }
       credentials {
         username = 'mapbox'
         password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
       }
-    }`,
-        anchor: new RegExp(`^\\s*allprojects\\s*{`),
-        offset: 2,
+    }
+  }
+}
+`;
+// Fork of config-plugins mergeContents, but appends the contents to the end of the file.
+function appendContents({ src, newSrc, tag, comment, }) {
+    const header = (0, generateCode_1.createGeneratedHeaderComment)(newSrc, tag, comment);
+    if (!src.includes(header)) {
+        // Ensure the old generated contents are removed.
+        const sanitizedTarget = (0, generateCode_1.removeGeneratedContents)(src, tag);
+        const contentsToAdd = [
+            // @something
+            header,
+            // contents
+            newSrc,
+            // @end
+            `${comment} @generated end ${tag}`,
+        ].join('\n');
+        return {
+            contents: sanitizedTarget ?? src + contentsToAdd,
+            didMerge: true,
+            didClear: !!sanitizedTarget,
+        };
+    }
+    return { contents: src, didClear: false, didMerge: false };
+}
+function addMapboxMavenRepo(src) {
+    return appendContents({
+        tag: '@rnmapbox/maps-v2-maven',
+        src,
+        newSrc: gradleMaven,
         comment: '//',
     }).contents;
-};
+}
+exports.addMapboxMavenRepo = addMapboxMavenRepo;
+exports._addMapboxMavenRepo = addMapboxMavenRepo;
 const withAndroidAppGradle = (config) => {
     return (0, config_plugins_1.withAppBuildGradle)(config, ({ modResults, ...config }) => {
         if (modResults.language !== 'groovy') {

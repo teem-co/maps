@@ -11,7 +11,7 @@ typealias ImageOptionsDictionary = [String:ImageOptions]
 
 class RCTMGLImages : UIView, RCTMGLMapComponent {
 
-  var bridge : RCTBridge! = nil
+  weak var bridge : RCTBridge! = nil
   var remoteImages : [String:String] = [:]
 
   @objc

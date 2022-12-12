@@ -20,7 +20,7 @@ class MGLModule : NSObject {
           "Light": StyleURI.light.rawValue,
           "Dark": StyleURI.dark.rawValue,
           "Satellite": StyleURI.satellite.rawValue,
-          "SatelliteStreets": StyleURI.satelliteStreets.rawValue,
+          "SatelliteStreet": StyleURI.satelliteStreets.rawValue,
         ],
       "OfflinePackDownloadState":
         [
@@ -52,6 +52,7 @@ class MGLModule : NSObject {
           "RegionDidChange" : RCTMGLEvent.EventType.regionDidChange.rawValue,
           "CameraChanged" : RCTMGLEvent.EventType.cameraChanged.rawValue,
           "MapIdle" : RCTMGLEvent.EventType.mapIdle.rawValue,
+          "WillStartLoadingMap": RCTMGLEvent.EventType.willStartLoadingMap.rawValue,
           "DidFinishLoadingStyle": RCTMGLEvent.EventType.didFinishLoadingStyle.rawValue,
           "DidFinishLoadingMap": RCTMGLEvent.EventType.didFinishLoadingMap.rawValue,
           "DidFinishRenderingFrameFully":  RCTMGLEvent.EventType.didFinishRenderingFully.rawValue,

@@ -132,6 +132,16 @@ open class RCTMGLMapViewManager(context: ReactApplicationContext?) :
         mapView!!.setReactAttributionPosition(attributionPosition);
     }
 
+    @ReactProp(name = "attributionViewMargins")
+    fun setAttributionViewMargins(mapView: RCTMGLMapView?, scaleBarMargins: ReadableMap?) {
+        mapView!!.setReactAttributionViewMargins(scaleBarMargins!!);
+    }
+
+    @ReactProp(name = "attributionViewPosition")
+    fun setAttributionViewPosition(mapView: RCTMGLMapView?, scaleBarPosition: Int) {
+        mapView!!.setReactAttributionViewPosition(scaleBarPosition!!)
+    }
+
     @ReactProp(name = "logoEnabled")
     fun setLogoEnabled(mapView: RCTMGLMapView?, logoEnabled: Boolean?) {
         mapView!!.setReactLogoEnabled(logoEnabled);
@@ -269,11 +279,12 @@ open class RCTMGLMapViewManager(context: ReactApplicationContext?) :
                 );
             }
             METHOD_QUERY_FEATURES_RECT -> {
+                val layerIds = ConvertUtils.toStringList(args!!.getArray(3))
                 mapView.queryRenderedFeaturesInRect(
                         args!!.getString(0),
                         ConvertUtils.toRectF(args.getArray(1)),
                         ExpressionParser.from(args!!.getArray(2)),
-                        ConvertUtils.toStringList(args!!.getArray(3))
+                        if (layerIds.size == 0) null else layerIds
                 );
             }
             METHOD_VISIBLE_BOUNDS -> {

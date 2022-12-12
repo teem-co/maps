@@ -11,11 +11,14 @@ import {
   WarningAggregator,
   withProjectBuildGradle,
   withAppBuildGradle,
-} from '@expo/config-plugins';
+} from 'expo/config-plugins';
+
 import {
   mergeContents,
+  createGeneratedHeaderComment,
   removeGeneratedContents,
-} from '@expo/config-plugins/build/utils/generateCode';
+  MergeResults,
+} from './generateCode';
 
 let pkg: { name: string; version?: string } = {
   name: '@rnmapbox/maps',
@@ -268,41 +271,66 @@ const addLibCppFilter = (appBuildGradle: string): string => {
   }).contents;
 };
 
-const addMapboxMavenRepo = (projectBuildGradle: string): string => {
-  if (projectBuildGradle.includes('api.mapbox.com/downloads/v2/releases/maven'))
-    return projectBuildGradle;
-
-  /*
-  return projectBuildGradle.replace(
-    /repositories \s?{/,
-    `repositories {
-       maven {
-        url 'https://api.mapbox.com/downloads/v2/releases/maven'
-        authentication { basic(BasicAuthentication) }
-        credentials { 
-          username = 'mapbox'
-          password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
-        }
-       }
-  `,
-  );*/
-
-  return mergeContents({
-    tag: `@rnmapbox/maps-v2-maven`,
-    src: projectBuildGradle,
-    newSrc: `maven {
+// Because we need the package to be added AFTER the React and Google maven packages, we create a new allprojects.
+// It's ok to have multiple allprojects.repositories, so we create a new one since it's cheaper than tokenizing
+// the existing block to find the correct place to insert our mapbox maven.
+const gradleMaven = `
+allprojects {
+  repositories {
+    maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication { basic(BasicAuthentication) }
       credentials {
         username = 'mapbox'
         password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
       }
-    }`,
-    anchor: new RegExp(`^\\s*allprojects\\s*{`), // TODO repositories { is needed as well
-    offset: 2,
+    }
+  }
+}
+`;
+
+// Fork of config-plugins mergeContents, but appends the contents to the end of the file.
+function appendContents({
+  src,
+  newSrc,
+  tag,
+  comment,
+}: {
+  src: string;
+  newSrc: string;
+  tag: string;
+  comment: string;
+}): MergeResults {
+  const header = createGeneratedHeaderComment(newSrc, tag, comment);
+  if (!src.includes(header)) {
+    // Ensure the old generated contents are removed.
+    const sanitizedTarget = removeGeneratedContents(src, tag);
+    const contentsToAdd = [
+      // @something
+      header,
+      // contents
+      newSrc,
+      // @end
+      `${comment} @generated end ${tag}`,
+    ].join('\n');
+
+    return {
+      contents: sanitizedTarget ?? src + contentsToAdd,
+      didMerge: true,
+      didClear: !!sanitizedTarget,
+    };
+  }
+  return { contents: src, didClear: false, didMerge: false };
+}
+
+export function addMapboxMavenRepo(src: string): string {
+  return appendContents({
+    tag: '@rnmapbox/maps-v2-maven',
+    src,
+    newSrc: gradleMaven,
     comment: '//',
   }).contents;
-};
+}
 
 const withAndroidAppGradle: ConfigPlugin<MapboxPlugProps> = (config) => {
   return withAppBuildGradle(config, ({ modResults, ...config }) => {
@@ -363,3 +391,17 @@ const withMapbox: ConfigPlugin<MapboxPlugProps> = (
 };
 
 export default createRunOncePlugin(withMapbox, pkg.name, pkg.version);
+
+// TODO: export internal functions for testing purposes
+export {
+  // the following methods accept a string and return a string
+  addMapboxMavenRepo as _addMapboxMavenRepo,
+  // addLibCppFilter as _addLibCppFilter,
+  // Following methods accept a config object
+  // withAndroidProperties as _withAndroidProperties,
+  // withAndroidPropertiesDownloadToken as _withAndroidPropertiesDownloadToken,
+  // withAndroidPropertiesImpl2 as _withAndroidPropertiesImpl2,
+  // withAndroidAppGradle as _withAndroidAppGradle,
+  // withAndroidProjectGradle as _withAndroidProjectGradle,
+  // withMapboxAndroid as _withMapboxAndroid,
+};

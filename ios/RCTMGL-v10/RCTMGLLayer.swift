@@ -7,11 +7,12 @@ protocol RCTMGLSourceConsumer {
 
 @objc(RCTMGLLayer)
 class RCTMGLLayer : UIView, RCTMGLMapComponent, RCTMGLSourceConsumer {
-  var bridge : RCTBridge? = nil
+  weak var bridge : RCTBridge? = nil
 
   @objc var sourceLayerID : String? = nil {
     didSet { self.optionsChanged() }
   }
+
   @objc var reactStyle : Dictionary<String, Any>? = nil {
     didSet {
       DispatchQueue.main.async {
@@ -231,8 +232,6 @@ class RCTMGLLayer : UIView, RCTMGLMapComponent, RCTMGLSourceConsumer {
       } catch {
         Logger.log(level: .error, message: "parsing filters failed for layer \(optional: id): \(error.localizedDescription)")
       }
-    } else {
-      layer.filter = nil
     }
     
     if let minZoom = minZoomLevel {

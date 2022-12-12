@@ -6,7 +6,7 @@ class RCTMGLSymbolLayer: RCTMGLVectorLayer {
   typealias LayerType = SymbolLayer
 
   override func makeLayer(style: Style) throws -> Layer {
-    let vectorSource : VectorSource = try self.layerWithSourceID(in: style)
+    let _ : VectorSource = try self.layerWithSourceID(in: style)
     var layer = LayerType(id: self.id!)
     layer.sourceLayer = self.sourceLayerID
     layer.source = sourceID
@@ -35,7 +35,9 @@ class RCTMGLSymbolLayer: RCTMGLVectorLayer {
         styler.symbolLayer(
           layer: &styleLayer,
           reactStyle: reactStyle,
-          applyUpdater: { (updater) in try! style.updateLayer(withId: self.id, type: LayerType.self) { (layer: inout LayerType) in updater(&layer) }},
+          applyUpdater: { (updater) in logged("RCTMGLSymbolLayer.updateLayer") {
+            try style.updateLayer(withId: self.id, type: LayerType.self) { (layer: inout LayerType) in updater(&layer) }
+          }},
           isValid: {
             return self.isAddedToMap()
           }

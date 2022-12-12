@@ -20,15 +20,18 @@ class RCTMGLRasterLayer: RCTMGLLayer {
   }
  
   override func addStyles() {
-    if let style : Style = self.style {
+    if let style : Style = self.style,
+       let reactStyle = reactStyle {
       let styler =  RCTMGLStyle(style: self.style!)
       styler.bridge = self.bridge
       
       if var styleLayer = self.styleLayer as? LayerType {
         styler.rasterLayer(
           layer: &styleLayer,
-          reactStyle: reactStyle!,
-          applyUpdater:{ (updater) in try! style.updateLayer(withId: self.id, type: LayerType.self) { (layer: inout LayerType) in updater(&layer) }},
+          reactStyle: reactStyle,
+          applyUpdater:{ (updater) in logged("RCTMGLRasterLayer.updateLayer") {
+            try style.updateLayer(withId: self.id, type: LayerType.self) { (layer: inout LayerType) in updater(&layer) }
+          }},
           isValid: { return self.isAddedToMap() }
         )
         self.styleLayer = styleLayer
