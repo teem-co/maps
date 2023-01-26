@@ -59,6 +59,7 @@ class RCTMGLMarkerViewManager(reactApplicationContext: ReactApplicationContext?)
                 override fun onViewAnnotationVisibilityUpdated(view: View, visible: Boolean) {
                     val parent = view.parent
                     if (parent is FrameLayout) {
+                        parent.clipChildren = false
                         if ((parent.width == 0 && parent.height == 0) && (mapView.width != 0 || mapView.height != 0)) {
                             parent.layout(0,0,mapView.width, mapView.height)
                         }
